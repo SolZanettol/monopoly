@@ -25,9 +25,8 @@ sim_conf = SimulationConfig()
 log = Log()
 
 # simulate one game
-def one_game(run_number):
+def one_game(run_number, game_rules=GameRulesConfig()):
 
-    game_rules = GameRulesConfig()
     player_behaviours = PlayerBehaviourConfig(0)
 
     # create players
@@ -100,18 +99,27 @@ def one_game(run_number):
     results = [players[i].get_money() for i in range(sim_conf.n_players)]
 
     # if it is an only simulation, print map and final score
-    if sim_conf.n_simulations == 1 and sim_conf.show_map:
+    if sim_conf.show_map:
         game_board.printMap()
 
-    if sim_conf.n_simulations == 1 and sim_conf.show_result:
-        print(results)
+    if sim_conf.show_result:
+        with open("in.txt", mode='a') as f:
+            for player in players:
+                f.write(f"{player.name} {player.money} {player.position}\n")
     return results, last_turn, log.get_data()
 
 
-def run_simulation(parallel=False):
+def run_simulation(parallel=False, amounts=None, n_sim=None):
     """run multiple game simulations"""
+    if n_sim is not None:
+        sim_conf.n_simulations = n_sim
+    if amounts is None:
+        amounts = [1500]*sim_conf.n_simulations
+
+
     results = []
     local_log = Log()
+    open("in.txt", 'w')
 
     with Pool(processes=sim_conf.num_threads) as pool:
 
@@ -153,7 +161,9 @@ def run_simulation(parallel=False):
                 local_log.write("=" * 10 + " GAME " + str(i+1) + " " + "=" * 10 + "\n")
             
                 # remaining players - add to the results list
-                game_result = one_game(i)
+                game_config = GameRulesConfig()
+                game_config.starting_money = amounts[i]
+                game_result = one_game(i, game_rules=game_config)
                 results.append(game_result)
 
                 # determine winner
@@ -174,11 +184,6 @@ def run_simulation(parallel=False):
 
         if sim_conf.show_progress_bar:
             pbar.finish()
-        
-        print(f"Winners distribution (A, B, C, D ...) across {len(game_lengths)} games that finished:")
-        print(tracking_winners)
-
-        print(f"Average game length: {mean(game_lengths)} (excluding games that did not finish).")
 
     return results
 
@@ -192,11 +197,10 @@ if __name__ == "__main__":
         random.seed(sim_conf.seed)
     else:
         random.seed()
-
     print("Players:", sim_conf.n_players, " Turns:", sim_conf.n_moves,
           " Games:", sim_conf.n_simulations, " Seed:", sim_conf.seed)
 
-    results_and_metrics = run_simulation(parallel=True)
+    results_and_metrics = run_simulation(parallel=False)
     results = []
     metric_str = ""
     for result, game_length, metrics in results_and_metrics:

@@ -22,12 +22,12 @@ class WriteMode(Enum):
 class SimulationConfig(MonopolyConfig):
     # simulation settings
     n_players = 4
-    n_moves = 1000
-    n_simulations = 1000
+    n_moves = 5
+    n_simulations = 100
     seed = None  #
-    shuffle_players = True
+    shuffle_players = False
     real_time = False  # Allow step by step execution via space/enter key
-    num_threads = 16
+    num_threads = 1
     # reporting settings
     show_progress_bar = True
     show_map = True  # only for 1 game: show final board map
@@ -63,6 +63,6 @@ class PlayerBehaviourConfig(MonopolyConfig):
     build_only_three_houses = False
     unspendable_cash = 0  # unspendable money
     unmortgage_coeff = 3  # repay mortgage if you have times this cash
-    refuse_to_trade = False  # willing to trade property
-    three_way_trade = True  # willing to trade property three-way
-    build_randomly = False
+    refuse_to_trade = True  # willing to trade property
+    three_way_trade = False  # willing to trade property three-way
+    build_randomly = True

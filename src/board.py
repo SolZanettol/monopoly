@@ -633,19 +633,17 @@ class Board:
             self.b[position].action(player, self)
 
     def printMap(self):
+        map_string = ""
         for i in range(len(self.b)):
             if type(self.b[i]) == Property:
-                print(
-                    i,
-                    self.b[i].name,
-                    "houses:",
-                    self.b[i].hasHouses,
-                    "mortgaged:",
-                    self.b[i].isMortgaged,
-                    "owner:",
-                    "none" if self.b[i].owner == "" else self.b[i].owner.name,
-                    "monopoly" if self.b[i].isMonopoly else "",
-                )
+                map_string += (str(i) + " " +
+                    self.b[i].name.replace(' ', '_') + " " +
+                    str(self.b[i].hasHouses) + " " +
+                    str(int(self.b[i].isMortgaged)) + ("" if self.b[i].owner == "" else (" " + self.b[i].owner.name)) + '\r')
+
+
             else:
                 pass
                 # print (i, type(self.b[i]))
+        with open("in.txt", mode='a') as f:
+            f.write(map_string)
